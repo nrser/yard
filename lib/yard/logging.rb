@@ -68,6 +68,58 @@ module YARD
     end
     attr_accessor :warned
 
+    # Dump values (`#inspect`) and their types as a `debug`-level log message.
+    # 
+    # @example Dump values with a message
+    #   log.dump "There was a problem with the ", obj, "object!",
+    #     value_a: value_a,
+    #     value_b: value_b
+    # 
+    # @example Dump values without a message
+    #   log.dump value_a: value_a, value_b: value_b
+    # 
+    # @param [Array<String | Object>] message
+    #   Optional log message. Entries will be space-joined to form the message 
+    #   string: strings will be left as-is, and other objects will be
+    #   stringified by calling their `#inspect` method. See examples.
+    # 
+    # @param [Hash<Symbol, Object>] values
+    #   Map of names to values to dump.
+    # 
+    # @return
+    #   Whatever {#debug} returns.
+    # 
+    def dump(*message, **values)
+      max_name_length = values.
+        keys.
+        map { |name| name.to_s.length }.
+        max
+
+      values_str = values.
+        map { |name, value|
+          name_str = "%-#{ max_name_length + 2 }s" % "#{ name }:"
+
+          "  #{ name_str } #{ value.inspect } (#{ value.class })"
+        }.
+        join( "\n" )
+      
+      message_str = message.
+        map { |part|
+          case part
+          when String
+            part
+          else
+            part.inspect
+          end
+        }.
+        join( " " )
+      
+      log_str = "Values:\n\n#{ values_str }\n"
+      log_str = "#{ message_str }\n\n#{ log_str }" unless message_str.empty?
+
+      debug log_str
+    end
+
     # Captures the duration of a block of code for benchmark analysis. Also
     # calls {#progress} on the message to display it to the user.
     #

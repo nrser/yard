@@ -31,7 +31,25 @@ module YARD
       #
       # @raise [ArgumentError] if namespace is not a NamespaceObject
       # @return [Proxy] self
-      def initialize(namespace, name, type = nil)
+      def initialize(namespace_arg, name_arg, type = nil)
+        # We want to save a reference to the `namespace` and `name` as they
+        # were provided for debugging, so I've renamed the `namespace` and 
+        # `name` args to `namespace_arg` and `name_arg`, respectively, and then
+        # we copy those into the `namespace` and `name` variables, `#dup`ing
+        # if supported.
+        # 
+        namespace = if namespace_arg.respond_to?( :dup )
+          namespace_arg.dup
+        else
+          namespace
+        end
+
+        name = if name_arg.respond_to?( :dup )
+          name_arg.dup
+        else
+          name
+        end
+
         namespace = Registry.root if !namespace || namespace == :root
 
         if name =~ /^#{NSEPQ}/
@@ -64,7 +82,17 @@ module YARD
         end
 
         unless @namespace.is_a?(NamespaceObject) || @namespace.is_a?(Proxy)
-          raise ArgumentError, "Invalid namespace object: #{namespace}"
+          # Dump information (debug log level) that is useful for figuring out
+          # what doc caused the issue
+          log.dump "Proxy#initialize encountered invalid namespace object",
+            namespace_arg: namespace_arg,
+            name_arg: name_arg,
+            computed_namespace: namespace,
+            computed_name: name,
+            type: type
+
+          debug_with_pry_then_raise ArgumentError,
+            "Invalid namespace object: #{namespace}, see logs for details."
         end
 
         # If the name begins with "::" (like "::String")

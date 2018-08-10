@@ -264,6 +264,35 @@ module YARD
     def self.arguments
       ARGV + @yardopts
     end
+
+    # Set whether we try to boot pry as debugger when things go wrong.
+    # 
+    # @param [Boolean] enabled
+    #   Pass `true` to enable, `false` to disable.
+    # 
+    # @return [Boolean]
+    #   The `enabled` param.
+    # 
+    def self.pry= enabled
+      @pry = enabled
+    end
+
+    # Should we try to pry (debugger) when fans are hit with feces? Makes sure
+    # the `pry` gem is available and loaded as well.
+    # 
+    # @return [Boolean]
+    # 
+    def self.pry?
+      @pry && begin
+        require 'pry'
+      rescue LoadError => error
+        log.warn "we were told to pry, but we can't load the gem: #{ error }"
+        false
+      else
+        true
+      end
+    end
+
   end
 
   Config.options = Config::DEFAULT_CONFIG_OPTIONS

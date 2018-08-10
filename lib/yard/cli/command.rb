@@ -42,6 +42,7 @@ module YARD
         opts.on_tail('--verbose', 'Show more information.') { log.level = Logger::INFO }
         opts.on_tail('--debug', 'Show debugging information.') { log.level = Logger::DEBUG }
         opts.on_tail('--backtrace', 'Show stack traces') { log.show_backtraces = true }
+        opts.on_tail('--pry', 'Start pry as a debugger when something goes wrong') { YARD::Config.pry = true }
         opts.on_tail('-v', '--version', 'Show version.') { log.puts "yard #{YARD::VERSION}"; exit }
         opts.on_tail('-h', '--help', 'Show this help.')  { log.puts opts; exit }
       end
