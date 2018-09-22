@@ -35,20 +35,11 @@ module YARD
         # We want to save a reference to the `namespace` and `name` as they
         # were provided for debugging, so I've renamed the `namespace` and 
         # `name` args to `namespace_arg` and `name_arg`, respectively, and then
-        # we copy those into the `namespace` and `name` variables, `#dup`ing
-        # if supported.
+        # we copy those into the `namespace` and `name` variables, trying to 
+        # `#dup` and falling back to referencing.
         # 
-        namespace = if namespace_arg.respond_to?( :dup )
-          namespace_arg.dup
-        else
-          namespace
-        end
-
-        name = if name_arg.respond_to?( :dup )
-          name_arg.dup
-        else
-          name
-        end
+        namespace = begin; namespace_arg.dup; rescue; namespace; end
+        name = begin; name_arg.dup; rescue; name; end
 
         namespace = Registry.root if !namespace || namespace == :root
 
