@@ -243,16 +243,40 @@ module YARD
           else
             link = linkify(name, title)
             if (link == name || link == title) && (name + ' ' + link !~ /\A<a\s.*>/)
-              match = /(.+)?(\{#{Regexp.quote name}(?:\s.*?)?\})(.+)?/.match(text)
-              file = (defined?(@file) && @file ? @file.filename : object.file) || '(unknown)'
-              line = (defined?(@file) && @file ? 1 : (object.docstring.line_range ? object.docstring.line_range.first : 1)) + (match ? $`.count("\n") : 0)
-              log.warn "In file `#{file}':#{line}: Cannot resolve link to #{name} from text" + (match ? ":" : ".") +
-                       "\n\t" + (match[1] ? '...' : '') + match[2].delete("\n") + (match[3] ? '...' : '') if match
+              # FIXME   Not sure exactly what I was doing here, but looks like  
+              #         I disabled YARD's stock built-in linking, probably 
+              #         'cause it's all now covered by linking the stdlib, 
+              #         though I'm sure this will need to be put back somehow
+              #         since stdlib linking is going to be a plugin that won't
+              #         always be present.
+              # 
+              # if YARD::CodeObjects::BUILTIN_ALL.include?( name )
+              #   link = link_builtin name, title
+
+              # else
+                match = /(.+)?(\{#{Regexp.quote name}(?:\s.*?)?\})(.+)?/.match(text)
+                file = (defined?(@file) && @file ? @file.filename : object.file) || '(unknown)'
+                line = (defined?(@file) && @file ? 1 : (object.docstring.line_range ? object.docstring.line_range.first : 1)) + (match ? $`.count("\n") : 0)
+                
+                log.warn "In file `#{file}':#{line}: Cannot resolve link to #{name} from text" + (match ? ":" : ".") +
+                        "\n\t" + (match[1] ? '...' : '') + match[2].delete("\n") + (match[3] ? '...' : '') if match
+                
+                log.dump "Cannot resolve link",
+                  name: name,
+                  title: title,
+                  link: link,
+                  location: "#{ file }:#{ line }"
+              # end
             end
 
             link
           end
         end
+      end
+
+      def link_builtin(name, title = nil)
+        title ||= name
+        %Q{<a href="https://ruby-doc.org/core/#{ name }.html">#{ title }</a>}
       end
 
       # (see BaseHelper#link_file)
