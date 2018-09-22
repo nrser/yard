@@ -52,6 +52,11 @@ module YARD::Templates::Helpers
     #   linkify('file:README')
     # @example Linking an object by path
     #   linkify('YARD::Docstring')
+    # 
+    # @return [String]
+    #   Seems to returns the text that should be inserted into the document,
+    #   so a `<a href=...></a>` for HTML, etc.
+    # 
     def linkify(*args)
       if args.first.is_a?(String)
         case args.first
